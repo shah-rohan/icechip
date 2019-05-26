@@ -1,4 +1,4 @@
-# icechip
+# Tools for Analyzing ICeChIP-seq Datasets
 This repository contains scripts and tools for analyzing ICeChIP-seq data, as described by Grzybowski et al. (2015) and Shah et al. (2018).
 
 ## Dependencies and Required Files
