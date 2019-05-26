@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# version 2017-05-09
+
+export LANGUAGE=en_US
+export LANG=en_US
+export LC_ALL=en_US
+pcores=1
+MAQ=20
+L=200
+helpmessage="Usage: icechip [options]
+
+Inputs:
+-p number of CPU threads to use for multithreading [$pcores].
+-x bowtie2indices(required) - provide path to basename of bowtie2 indices. They need to be made from genome of interest with barcodes sequences appended, where each fasta entry is another barcode.  
+-1 R1_fastq.fastq(required) - provide path to the first mate in fastq format.
+-2 R2_fastq.fastq(required) - provide path to the second mate in fastq format.
+-q MAQ_Cutoff >= [$MAQ] - provide cutoff value for phred score mapping quality (if -q 13, then 95 per cent of fragments properly mapped; if -q 20, then 99 per cent of fragments properly mapped).
+-l Length_Cutoff <= [$L] - provide cutoff for fragment size, $L bp is set up as default, this option safeguards that only mononucleosomes are being counted.
+-g genome.len(required) - provide path to a file with the length of each chromosome, it should be a tabulated file with following columns <chromosome-name> <chromosome-length>. Can be made using samtools faidx, first two columns of .fa.fai file.
+-c calibration table(required) - provide path to tabulated file with <barcode-name> <histone mark>.
+-o output file basename(required) - provide output name. Do not use whitespaces. 
+-h help
+
+Outputs:
+basename.bam - bam file of aligned reads. 
+basename_mQ20_L200.bed - interval file of fragments with mapping quality of at least 20 and maximal length of 200bp.
+basename_mQ20_L200_genome_coverage.bedgraph - bedgraph file of genome coverage for fragments with mapping quality of at least 20 and maximal length of 200bp. <chr> <start> <stop> <HMD>
+basename_mQ20_L200_genome_coverage.bigwig - bigwig file of genome coverage for fragments with mapping quality of at least 20 and maximal length of 200bp. Used for visualization.
+basename_mQ20_L200.cal - counts occurrence of each barcode and each mark in basename_mQ20_L200.bed file. Used for calculating HMD and off-specificities. 
+basename_mQ20_L200.log - provides statistics on an amount of fragments fulfilling requirements at each step of analysis. Used for troubleshooting. 
+
+Usage:
+./icechip -p 1 -x /pathto/bowtie2indices -1 /pathto/R1_fastq.fastq -2 /pathto/R2_fastq.fastq -q 20 -l 200 -g /pathto/refgenome.len -c output_1 
+icechip needs to be executable by the user, you can grant suitable privileges by using command: sudo chmod u+x icechip.
+if icechip is added to the PATH you can skip ./ in front of icechip.
+
+This script requires UNIX environment and following programs installed and added to PATH: awk, sort, Bowtie2, SAMtools, BEDtools and bedGraphToBigWig.
+You will have to create bowtie2indices manually, to the fasta file of chromosomes append list of barcodes in a fasta format, then create bowtie2 indices using bowtie2-build command.
+Script tested on Ubuntu 12.04LTS.
+Created by Adrian Grzybowski pantadeusz@uchicago.edu\n"
+
+ 
+while getopts "p:x:1:2:q:l:g:c:o:h*" opt; do
+        case $opt in
+                p) pcores=$OPTARG;;
+		x) bt2index=$OPTARG;;
+		1) R1fq=$OPTARG;;
+		2) R2fq=$OPTARG;;
+		q) MAQ=$OPTARG;;
+		l) L=$OPTARG;;
+		g) g=$OPTARG;;
+		c) Calibration_table=$OPTARG;;
+		o) o=$OPTARG;;
+                h) printf "$helpmessage"
+		   exit;;
+		:) printf "illegal option: -%s\n" "$OPTARG" >&2
+      		  	   printf "$helpmessage"
+		   exit;;
+		
+	esac
+done
+
+if [ $# -eq 0 ];
+then
+    printf "$helpmessage"
+    exit 0
+else
+
+OIFS=$IFS
+IFS=','
+IFS=$OIFS
+tmpfile1=$RANDOM$RANDOM$RANDOM".tmp"
+tmpfile2=$RANDOM$RANDOM$RANDOM".tmp"
+
+#Define output files.
+prefix=${o}
+Outfile0=$prefix".sam"
+Outfile1=$prefix"_mQ"$MAQ"_L"$L".bed"
+Outfile2=$prefix"_mQ"$MAQ"_L"$L"_genome_coverage.bedgraph"
+Outfile3=$prefix"_mQ"$MAQ"_L"$L"_genome_coverage.bigwig"
+Outfile4=$prefix"_mQ"$MAQ"_L"$L".cal"
+Outfile5=$prefix"_mQ"$MAQ"_L"$L".log"
+Outfile6=$prefix".bam"
+
+#Test for required files
+if [ ! -f $bt2index".1.bt2" ]; then
+    echo $bt2index not found!
+fi
+if [ ! -f $R1fq ]; then
+    echo $R1fq not found!
+fi
+if [ ! -f $R2fq ]; then
+    echo $R2fq not found!
+fi
+if [ ! -f $g ]; then
+    echo $g not found!
+fi
+if [ ! -f $Calibration_table ]; then
+    echo $Calibration_table not found!
+fi
+
+#Align reads to the reference genome it will use number of cores=$pcores, it will accept fragments of length 0-700, it will align end-to-end with sensitive preset. It takes reference genome name path at it basename(without .bt2 etc), Reads_R1, Reads_R2, and output it into $Outfile0.
+bowtie2 -p $pcores -I 0 -X 700 --end-to-end --sensitive -x $bt2index -1 $R1fq -2 $R2fq -S $Outfile0
+
+#Filter fragments that have MAQ score below $MAQ, and are longer than 200. Moreover it only accepts reads that are properly mapped in proper pairs and flatens pairs of reads into fragments. Subsequently it makes sure that there is no data input where start position would be behind end position in .bed file, sort it and deposit in .bed file format.
+awk -v MAQ=$MAQ -v L=$L '$5>=MAQ && $9<=L && $2==99 || $5>=MAQ && $9<=L && $2==163 {print $3"\t"$4"\t"$4+$9-1}' $Outfile0 | awk '$2<=$3{print $1"\t"$2"\t"$3}' | sort -k1,1 -k2,2n > $Outfile1
+
+#It takes .bed file and create genome coverage in. bedgraph format.
+bedtools genomecov -i $Outfile1 -g $g -bga > $Outfile2
+
+#It takes .bedgraph and convert it into bigwig.
+bedGraphToBigWig $Outfile2 $g $Outfile3
+
+#Counts how many times each reference name is represented. It is used to calculate correction factors. 
+echo $Outfile4 > $tmpfile2; mv $tmpfile2 $Outfile4
+
+awk '{print $1}' $Outfile1 | uniq -c | awk '{print $2"\t"$1}' >> $Outfile4 ; awk 'NR==FNR{a[$1]=$2;next}$1 in a {$0=$0 "\t" a[$1]; print }' $Calibration_table $Outfile4 | sort -k3,3  > $tmpfile2 ; awk '{a[$3]+=$2}END{for (i in a) print i"\t"a[i]}' $tmpfile2 >> $Outfile4; rm $tmpfile2
+
+#Provides information about survavilibility of reads.
+samtools view $Outfile0 | tee >(echo -e Fragments aligned"\t"$[$(wc -l)/2] > $Outfile5) | awk '$2==99 || $2==163 {print $5"\t"$9}' | tee >(echo -e Fragments properly mapped"\t"$(wc -l) >> $Outfile5 ) | awk '$1>=20 {print $2}'| tee >(echo -e Fragments with mq larger-or-equal to $MAQ"\t"$(wc -l) >> $Outfile5 ) | awk '$1<=200{print $1}' | echo -e Fragments shorter-or-equal to $L bp"\t"$(wc -l) >> $Outfile5 ; echo -e Fragments non-duplicated"\t"$(wc -l $Outfile1 | awk '{print $1}') >> $Outfile5
+
+#converts .sam into .bam, and removes .sam afterwards
+samtools view -bS $Outfile0 > $tmpfile1 ; samtools sort $tmpfile1 > $Outfile6 ; rm $tmpfile1
+rm $Outfile0
+fi
