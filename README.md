@@ -1,6 +1,7 @@
 # icechip
 This repository contains scripts and tools for analyzing ICeChIP-seq data, as described by Grzybowski et al. (2015) and Shah et al. (2018).
 
+## Dependencies and Required Files
 These scripts assume use of a UNIX system and require the following tools to be installed and added to the PATH environment variable: Bowtie2 (http://bowtie-bio.sourceforge.net/bowtie2/index.shtml), BedTools (https://bedtools.readthedocs.io/en/latest/), SamTools (http://www.htslib.org/), and UCSCTools (http://hgdownload.soe.ucsc.edu/admin/exe/).
 
 We have tested these scripts on Ubuntu LTS 12.04, 14.04, 16.04, and 18.04. For the above listed tools, we have tested Bowtie2 v. 2.3.4.1, BedTools v. 2.26.0, and SamTools v. 1.7.
@@ -13,7 +14,33 @@ Additionally, a custom genome must be built by concatenating the reference genom
 
 Sample data to test these scripts can be found at the Gene Expression Omnibus (GEO) under accession number GSE103543 (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103543). The calibration table provided in the "Example Files" folder is designed to work with these sample data.
 
+## Scripts
+The following scripts are used to analyze the ICeChIP-seq datasets. They are provided in the "Scripts" folder.
+
+### icechip
 The icechip script should be run on the sequencing reads from each sample (i.e. on every input and on every IP). This script will:
-	1. Use Bowtie2 to align the fastq files to the concatenated genome using the Bowtie2 index
-	1. Filter the alignments for both alignment quality and for insert length (default: filter for mononucleosome-sized inserts), and
-	1. Generate genome coverage maps and calibration files counting read pairs mapping to each chromosome and histone modification (per calibration table)
+
+1. Use Bowtie2 to align the fastq files to the concatenated genome using the Bowtie2 index
+2. Filter the alignments for both alignment quality and for insert length (default: filter for mononucleosome-sized inserts), and
+3. Generate genome coverage maps and calibration files counting read pairs mapping to each chromosome and histone modification (per calibration table)
+
+Syntax:
+
+`./icechip -p <number of cores> -x <Bowtie2 index base name> -1 <FastQ file for read 1> -2 <FastQ file for read 2> -g <chromosome length file> -c <calibration table> -o <output file base name>`
+
+The expected output of the icechip script is a genome coverage bedgraph file, a genome coverage bigwig file for genome browser visualization, a calibration file (extension .cal), and a log file that gives statistics on the number of reads processed at each step (extension .log).
+
+### computeHMDandError
+The computeHMDandError script should be run on each IP and its associated input dataset. If multiple IPs share a single input, then that same input dataset is used for each of those IP datasets. This script will:
+
+1. Compute the HMD genome-wide, 
+2. Compute the magnitude of the 95% confidence interval genome-wide using Poisson statistics, and
+3. Compute the upper and lower bounds of the 95% confidence interval genome-wide.
+
+All of the outputs of the icechip script for the IP and input should be in the same folder. The name of the modification should be the same target name listed in the calibration table.
+
+Syntax:
+
+`./computeHMDandError -m <name of modification> -1 <IP genome coverage bedgraph> -2 <Input genome coverage bedgraph> -g <chromosome length file>'`
+
+The expected output of the computeHMDandError script is an HMD bedgraph file, a 95% confidence interval magnitude bedgraph file, upper and lower bounds of confience interval bedgraph file, and bigwig files of these bedgraph files for genome browser visualization.
