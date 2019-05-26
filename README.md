@@ -20,7 +20,7 @@ Additionally, a custom genome must be built by concatenating the reference genom
 Sample data to test these scripts can be found at the Gene Expression Omnibus (GEO) under accession number GSE103543 (https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103543). The calibration table provided in the "Example Files" folder is designed to work with these sample data.
 
 ## Scripts
-The following scripts are used to analyze the ICeChIP-seq datasets. They are provided in the "Scripts" folder.
+The following bash scripts are used to analyze the ICeChIP-seq datasets. They are provided in the "Scripts" folder.
 
 ### icechip
 The icechip script should be run on the sequencing reads from each sample (i.e. on every input and on every IP). This script will:
@@ -49,3 +49,11 @@ Syntax:
 `./computeHMDandError -m <name of modification> -1 <IP genome coverage bedgraph> -2 <Input genome coverage bedgraph> -g <chromosome length file>'`
 
 The expected output of the computeHMDandError script is an HMD bedgraph file, a 95% confidence interval magnitude bedgraph file, upper and lower bounds of confience interval bedgraph file, and bigwig files of these bedgraph files for genome browser visualization.
+
+## License
+These resources are provided under a GNU General Public License. Scripts were written by Adrian T. Grzybowski and Rohan N. Shah.
+
+## References
+Grzybowski AT, Chen Z, Ruthenburg AJ. [Calibrating ChIP-Seq with Nucleosomal Internal Standards to Measure Histone Modification Density Genome Wide](https://www.cell.com/molecular-cell/fulltext/S1097-2765(15)00304-4). Mol Cell, 58:886-899. 2015.
+
+Shah RN, Grzybowski AT, Cornett EM, Johnstone AL, Dickson BM, Boone BA, Cheek MA, Cowles MW, Maryanski D, Meiners MJ, Tiedemann RL, Vaughan RM, Arora N, Sun Z-W, Rothbart SB, Keogh M-C, Ruthenburg AJ. [Examining the Roles of H3K4 Methylation States with Systematically Characterized Antibodies](https://www.cell.com/molecular-cell/fulltext/S1097-2765(18)30675-0). Mol Cell, 72:162-177. 2018.
