@@ -51,7 +51,7 @@ Syntax:
 The expected output of the computeHMDandError script is an HMD bedgraph file, a 95% confidence interval magnitude bedgraph file, upper and lower bounds of confience interval bedgraph file, and bigwig files of these bedgraph files for genome browser visualization.
 
 ## License
-These resources are provided under a GNU General Public License. Scripts were written by Adrian T. Grzybowski and Rohan N. Shah.
+These resources are provided under a GNU General Public License. Scripts were written by Adrian T. Grzybowski (pantadeusz@uchicago.edu) and Rohan N. Shah (rohanshah@uchicago.edu).
 
 ## References
 Grzybowski AT, Chen Z, Ruthenburg AJ. [Calibrating ChIP-Seq with Nucleosomal Internal Standards to Measure Histone Modification Density Genome Wide](https://www.cell.com/molecular-cell/fulltext/S1097-2765(15)00304-4). Mol Cell, 58:886-899. 2015.
