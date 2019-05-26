@@ -31,7 +31,7 @@ The icechip script should be run on the sequencing reads from each sample (i.e. 
 
 Syntax:
 
-`./icechip -p <number of cores> -x <Bowtie2 index base name> -1 <FastQ file for read 1> -2 <FastQ file for read 2> -g <chromosome length file> -c <calibration table> -o <output file base name>`
+`./icechip -p <number of cores; default 1> -x <Bowtie2 index base name> -1 <FastQ file for read 1> -2 <FastQ file for read 2> -g <chromosome length file> -c <calibration table> -q <MAPQ cutoff; default 20> -l <length cutoff; default 200> -o <output file base name>`
 
 The expected output of the icechip script is a genome coverage bedgraph file, a genome coverage bigwig file for genome browser visualization, a calibration file (extension .cal), and a log file that gives statistics on the number of reads processed at each step (extension .log).
 
