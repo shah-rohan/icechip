@@ -25,11 +25,12 @@ basename_HMD_minus95CI.bedgraph - genomewide lower bound for 95% confidence inte
 basename_HMD_minus95CI.bigwig - genomewide lower bound for 95% confidence interval in bigwig format
 
 Usage:
-./computeHMDandError -m H3K4me3 -1 /pathto/IP_genome_coverage.bedgraph -2 INPUT_genome_coverage.bedgraph
+./computeHMDandError -m <name of modification> -1 <IP genome coverage bedgraph> -2 <Input genome coverage bedgraph> -g <chromosome length file>
+
 computeHMDandError needs to be executable by the user, you can grant suitable privileges by using command >sudo chmod u+x computeHMDandError
 if computeHMDandError is added to the PATH you can skip ./ in front of the command.
 
-This script requires UNIX environment and following programs installed and added to PATH: awk, sort, BEDtools and bedGraphToBigWig. Script tested on Ubuntu 12.04LTS.
+This script requires UNIX environment and following programs installed and added to PATH: awk, sort, BEDtools and bedGraphToBigWig. Script tested on Ubuntu 12.04LTS, 14.04LTS, 16.04LTS, and 18.04LTS.
 Created by Adrian Grzybowski (pantadeusz@uchicago.edu) and Rohan Shah (rohanshah@uchicago.edu)\n"
 
 
