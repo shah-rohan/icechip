@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# version 2019-05-26
+
+export LANGUAGE=en_US
+export LANG=en_US
+export LC_ALL=en_US
+
+helpmessage="Usage: computeHMDandError [options]
+
+Inputs:
+-m name of the mark you are calibrating to (case sensitive), written as in the calibration table (required) 
+-1 IP_genome_coverage.bedgraph(required) - genome coverage of IP (appropriate .cal file need to be in the same directory) -from icechip program.
+-2 INPUT_genome_coverage.bedgraph(required) - genome coverage of INPUT (appropriate .cal file need to be in the same directory) - from icechip program.
+-g genome.len(required) - provide path to a file with the length of each chromosome, it should be a tabulated file with following columns <chromosome-name> <chromosome-length>. Can be made using samtools faidx, first two columns of .fa.fai.
+-h help 
+
+Outputs: 
+basename_HMD.bedgraph - genomewide histone modification density for declared mark in bedgraph format <chr> <start> <end> <HMD>
+basename_HMD.bigwig - genomewide histone modification density for declared mark in bigwig format. Bigwig is well suited for viewing in genome browser.
+basename_95CI.bedgraph - genomewide error for 95% confidence interval for declared mark in bedgraph format
+basename_95CI.bigwig - genomewide error for 95% confidence interval for declared mark in bigwig format
+basename_HMD_plus95CI.bedgraph - genomewide upper bound for 95% confidence interval in bedgraph format
+basename_HMD_plus95CI.bigwig - genomewide upper bound for 95% confidence interval in bigwig format
+basename_HMD_minus95CI.bedgraph - genomewide lower bound for 95% confidence interval in bedgraph format
+basename_HMD_minus95CI.bigwig - genomewide lower bound for 95% confidence interval in bigwig format
+
+Usage:
+./computeHMDandError -m <name of modification> -1 <IP genome coverage bedgraph> -2 <Input genome coverage bedgraph> -g <chromosome length file>
+
+computeHMDandError needs to be executable by the user, you can grant suitable privileges by using command >sudo chmod u+x computeHMDandError
+if computeHMDandError is added to the PATH you can skip ./ in front of the command.
+
+This script requires UNIX environment and following programs installed and added to PATH: awk, sort, BEDtools and bedGraphToBigWig. Script tested on Ubuntu 12.04LTS, 14.04LTS, 16.04LTS, and 18.04LTS.
+Created by Adrian Grzybowski (pantadeusz@uchicago.edu) and Rohan Shah (rohanshah@uchicago.edu)\n"
+
+
+while getopts "m:1:2:g:h*" opt; do
+    case $opt in
+    m) mark=$OPTARG;;
+    1) ip=$OPTARG;;
+    2) input=$OPTARG;;
+    g) genome=$OPTARG;;
+    h) printf "$helpmessage"
+    exit;;
+    :) printf "illegal option: -%s\n" "$OPTARG" >&2
+    printf "$helpmessage"
+    exit;;
+		
+	esac
+done
+if [ $# -eq 0 ];
+  then
+    printf "$helpmessage"
+    exit 0
+else
+
+  OIFS=$IFS
+  IFS=','
+  IFS=$OIFS
+
+  #Define output files.
+  Outfile0="${ip%bedgraph}mergegraph"
+  Outfile1="${ip%genome_coverage.bedgraph}"$mark"_HMD.bedgraph"
+  Outfile2="${ip%genome_coverage.bedgraph}"$mark"_HMD.bigwig"
+  Outfile3="${ip%genome_coverage.bedgraph}"$mark"_95CI.bedgraph"
+  Outfile4="${ip%genome_coverage.bedgraph}"$mark"_95CI.bigwig"
+  Outfile5="${ip%genome_coverage.bedgraph}"$mark"_HMD_plus95CI.bedgraph"
+  Outfile6="${ip%genome_coverage.bedgraph}"$mark"_HMD_plus95CI.bigwig"
+  Outfile7="${ip%genome_coverage.bedgraph}"$mark"_HMD_minus95CI.bedgraph"
+  Outfile8="${ip%genome_coverage.bedgraph}"$mark"_HMD_minus95CI.bigwig"
+
+  #Test for required files
+  if [ ! -f $ip ]; then
+    echo $ip not found!
+  fi
+  if [ ! -f $input ]; then
+    echo $input not found!
+  fi
+  if [ ! -f $genome ]; then
+    echo $genome not found!
+  fi
+  if [ ! -f ${ip%_genome_coverage.bedgraph}.cal ]; then
+    echo ${ip%_genome_coverage.bedgraph}.cal not found!
+  fi
+  if [ ! -f ${input%_genome_coverage.bedgraph}.cal ]; then
+    echo ${input%_genome_coverage.bedgraph}.cal not found!
+  fi
+
+  #Calculate correction factor for a specified histone mark
+  cal=`awk 'NR==FNR{a[$1]=$2;next}$1 in a{$1=$1 "\t" a[$1]; print }' ${ip%_genome_coverage.bedgraph}.cal ${input%_genome_coverage.bedgraph}.cal | awk -v mark=$mark '$1==mark{print $2/$3}'`
+  echo IP correction factor for $mark mark is $cal 
+
+  #Merge IP and Input bedgraph 
+  bedtools unionbedg -i $ip $input -header > $Outfile0
+
+  #Caclulate HMD and errors, format bedgraph output, proper order by chromosome name and position
+  awk -v cal=$cal 'NR>1 && $5>0{print $1"\t"$2"\t"$3"\t"(($4/$5)/cal)*100}' $Outfile0 | awk '!/nan/ && !/inf/ {printf "%s\t%.0f\t%.0f\t%.1f\n",$1,$2,$3,$4}' | sort -k1,1 -k2,2n > $Outfile1
+  awk -v cal=$cal 'NR>1 && $5>0{print $1"\t"$2"\t"$3"\t"100/cal*sqrt($4/($5^2) + ($4^2)/($5^3))*1.96}' $Outfile0 | awk '!/nan/ && !/inf/ {printf "%s\t%.0f\t%.0f\t%.1f\n",$1,$2,$3,$4}' | sort -k1,1 -k2,2n > $Outfile3
+  awk -v cal=$cal 'NR>1 && $5>0{print $1"\t"$2"\t"$3"\t"(($4/$5)/cal)*100 + 100/cal*sqrt($4/($5^2) + ($4^2)/($5^3))*1.96}' $Outfile0 | awk '!/nan/ && !/inf/ {printf "%s\t%.0f\t%.0f\t%.1f\n",$1,$2,$3,$4}' | sort -k1,1 -k2,2n > $Outfile5
+  awk -v cal=$cal 'NR>1 && $5>0{print $1"\t"$2"\t"$3"\t"(($4/$5)/cal)*100 - 100/cal*sqrt($4/($5^2) + ($4^2)/($5^3))*1.96}' $Outfile0 | awk '!/nan/ && !/inf/ {printf "%s\t%.0f\t%.0f\t%.1f\n",$1,$2,$3,$4}' | sort -k1,1 -k2,2n > $Outfile7
+  rm $Outfile0
+  
+  #Make bigwig file of HMD fromm bedgraph
+  bedGraphToBigWig $Outfile1 $genome $Outfile2
+  bedGraphToBigWig $Outfile3 $genome $Outfile4
+  bedGraphToBigWig $Outfile5 $genome $Outfile6
+  bedGraphToBigWig $Outfile7 $genome $Outfile8
+  
+fi
