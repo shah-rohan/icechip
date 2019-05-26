@@ -30,14 +30,16 @@ basename_mQ20_L200.cal - counts occurrence of each barcode and each mark in base
 basename_mQ20_L200.log - provides statistics on an amount of fragments fulfilling requirements at each step of analysis. Used for troubleshooting. 
 
 Usage:
-./icechip -p 1 -x /pathto/bowtie2indices -1 /pathto/R1_fastq.fastq -2 /pathto/R2_fastq.fastq -q 20 -l 200 -g /pathto/refgenome.len -c output_1 
+./icechip -p <number of cores; default 1> -x <Bowtie2 index base name> -1 <FastQ file for read 1> -2 <FastQ file for read 2> -g <chromosome length file> -c <calibration table> -q <MAPQ cutoff; default 20> -l <length cutoff; default 200> -o <output file base name>
+
 icechip needs to be executable by the user, you can grant suitable privileges by using command: sudo chmod u+x icechip.
 if icechip is added to the PATH you can skip ./ in front of icechip.
 
 This script requires UNIX environment and following programs installed and added to PATH: awk, sort, Bowtie2, SAMtools, BEDtools and bedGraphToBigWig.
 You will have to create bowtie2indices manually, to the fasta file of chromosomes append list of barcodes in a fasta format, then create bowtie2 indices using bowtie2-build command.
-Script tested on Ubuntu 12.04LTS.
-Created by Adrian Grzybowski pantadeusz@uchicago.edu\n"
+Script tested on Ubuntu 12.04LTS, 14.04LTS, 16.04LTS, and 18.04LTS.
+
+Created by Adrian Grzybowski (pantadeusz@uchicago.edu) and Rohan Shah (rohanshah@uchicago.edu)\n"
 
  
 while getopts "p:x:1:2:q:l:g:c:o:h*" opt; do
