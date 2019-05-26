@@ -2,7 +2,12 @@
 This repository contains scripts and tools for analyzing ICeChIP-seq data, as described by Grzybowski et al. (2015) and Shah et al. (2018).
 
 ## Dependencies and Required Files
-These scripts assume use of a UNIX system and require the following tools to be installed and added to the PATH environment variable: Bowtie2 (http://bowtie-bio.sourceforge.net/bowtie2/index.shtml), BedTools (https://bedtools.readthedocs.io/en/latest/), SamTools (http://www.htslib.org/), and UCSCTools (http://hgdownload.soe.ucsc.edu/admin/exe/).
+These scripts assume use of a UNIX system and require the following tools to be installed and added to the PATH environment variable:
+
+* Bowtie2 (http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+* BedTools (https://bedtools.readthedocs.io/en/latest/)
+* SamTools (http://www.htslib.org/)
+* UCSCTools (http://hgdownload.soe.ucsc.edu/admin/exe/).
 
 We have tested these scripts on Ubuntu LTS 12.04, 14.04, 16.04, and 18.04. For the above listed tools, we have tested Bowtie2 v. 2.3.4.1, BedTools v. 2.26.0, and SamTools v. 1.7.
 
