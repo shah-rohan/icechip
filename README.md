@@ -7,7 +7,7 @@ These scripts assume use of a UNIX system and require the following tools to be 
 * [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
 * [BedTools](https://bedtools.readthedocs.io/en/latest/)
 * [SamTools](http://www.htslib.org/)
-* [UCSCTools](http://hgdownload.soe.ucsc.edu/admin/exe/).
+* [UCSCTools](http://hgdownload.soe.ucsc.edu/admin/exe/)
 
 We have tested these scripts on Ubuntu LTS 12.04, 14.04, 16.04, and 18.04. For the above listed tools, we have tested Bowtie2 v. 2.3.4.1, BedTools v. 2.26.0, and SamTools v. 1.7.
 
