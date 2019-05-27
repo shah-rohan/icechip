@@ -4,10 +4,10 @@ This repository contains scripts and tools for analyzing ICeChIP-seq data, as de
 ## Dependencies and Required Files
 These scripts assume use of a UNIX system and require the following tools to be installed and added to the PATH environment variable:
 
-* Bowtie2 (http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
-* BedTools (https://bedtools.readthedocs.io/en/latest/)
-* SamTools (http://www.htslib.org/)
-* UCSCTools (http://hgdownload.soe.ucsc.edu/admin/exe/).
+* [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+* [BedTools](https://bedtools.readthedocs.io/en/latest/)
+* [SamTools](http://www.htslib.org/)
+* [UCSCTools](http://hgdownload.soe.ucsc.edu/admin/exe/).
 
 We have tested these scripts on Ubuntu LTS 12.04, 14.04, 16.04, and 18.04. For the above listed tools, we have tested Bowtie2 v. 2.3.4.1, BedTools v. 2.26.0, and SamTools v. 1.7.
 
@@ -59,8 +59,8 @@ Syntax:
 
 The expected output of the computeHMDandError script is an HMD bedgraph file, a 95% confidence interval magnitude bedgraph file, upper and lower bounds of confience interval bedgraph file, and bigwig files of these bedgraph files for genome browser visualization.
 
-## License
-These resources are provided under a GNU General Public License. Scripts were written by Adrian T. Grzybowski (pantadeusz@uchicago.edu) and Rohan N. Shah (rohanshah@uchicago.edu).
+## License and Contact
+These resources are provided under a GNU General Public License. Scripts were written by Adrian Grzybowski (pantadeusz@uchicago.edu) and Rohan Shah (rohanshah@uchicago.edu). Please contact Rohan Shah (rohanshah@uchicago.edu) or Alexander Ruthenburg (aruthenburg@uchicago.edu) with any questions, bug reports, or other concerns.
 
 ## References
 Grzybowski AT, Chen Z, Ruthenburg AJ. [Calibrating ChIP-Seq with Nucleosomal Internal Standards to Measure Histone Modification Density Genome Wide](https://www.cell.com/molecular-cell/fulltext/S1097-2765(15)00304-4). Mol Cell, 58:886-899. 2015.
