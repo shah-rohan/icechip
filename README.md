@@ -66,3 +66,5 @@ These resources are provided under a GNU General Public License. Scripts were wr
 Grzybowski AT, Chen Z, Ruthenburg AJ. [Calibrating ChIP-Seq with Nucleosomal Internal Standards to Measure Histone Modification Density Genome Wide](https://www.cell.com/molecular-cell/fulltext/S1097-2765(15)00304-4). Mol Cell, 58:886-899. 2015.
 
 Shah RN, Grzybowski AT, Cornett EM, Johnstone AL, Dickson BM, Boone BA, Cheek MA, Cowles MW, Maryanski D, Meiners MJ, Tiedemann RL, Vaughan RM, Arora N, Sun Z-W, Rothbart SB, Keogh M-C, Ruthenburg AJ. [Examining the Roles of H3K4 Methylation States with Systematically Characterized Antibodies](https://www.cell.com/molecular-cell/fulltext/S1097-2765(18)30675-0). Mol Cell, 72:162-177. 2018.
+
+Grzybowski AT\*, Shah RN\*, Richter WF, Ruthenburg AJ. [Native internally calibrated chromatin immunoprecipitation for quantitative studies of histone post-translational modifications](https://www.nature.com/articles/s41596-019-0218-7). Nat Protoc, 14, 3275–3302. 2019. \*Contributed equally.
